@@ -1,49 +1,33 @@
 #!/usr/bin/env python3
 
-# day1
-
-with open('input1') as fp:
-	lines = [line.strip() for line in fp.readlines()]
-
-sample = """\
-1721
-979
-366
-299
-675
-1456
-""".splitlines()
-
-numbers = list(sorted(map(int,[line.strip() for line in lines])))
+TARGET_SUM = 2020
 
 
-def part1(numbers):
-	for x in numbers:
-		for y in numbers:
-			if x+y==2020:
-				return x*y
+def part1(numbers, target=TARGET_SUM):
+    x, y = 0, len(numbers) - 1
+    while x < y:
+        xy = numbers[x] + numbers[y]
+        if xy == target:
+            return numbers[x] * numbers[y]
+        elif xy < target:
+            x += 1
+        else:
+            y -= 1
 
-def part1faster(number):
-	for i in range(len(numbers)):
-		for j in range(i+1, len(numbers)):
-				if numbers[i]+numbers[j]==2020:
-					return numbers[i]*numbers[j]
 
 def part2(numbers):
-	for x in numbers:
-		for y in numbers:
-			for z in numbers:
-				if x+y+z==2020:
-					return x*y*z
+    x = 0
+    while x < len(numbers) - 3:
+        target = TARGET_SUM - numbers[x]
+        if part1(numbers[x + 1 :], target):
+            return numbers[x] * part1(numbers[x + 1 :], target)
+        x += 1
 
-def part2faster(number):
-	for i in range(len(numbers)):
-		for j in range(i+1, len(numbers)):
-			if numbers[i]+numbers[j] >= 2020:
-				continue
-			for k in range(j+1, len(numbers)):
-				if numbers[i]+numbers[j]+numbers[k]==2020:
-					return numbers[i]*numbers[j]*numbers[k]
 
-print("#1", part1faster(numbers))
-print("#1", part2faster(numbers))
+with open("input1") as fp:
+    lines = [line.strip() for line in fp.readlines()]
+
+data = list(sorted(map(int, lines)))
+
+print("#1", part1(data))
+print("#2", part2(data))
