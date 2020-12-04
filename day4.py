@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import re
+
 
 def parse_passports(lines):
     passports = list()
@@ -22,7 +24,7 @@ REQUIRED_FIELDS = {"byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"}
 
 
 def check_passports(passports):
-	"""counts passports containing all REQUIRED_FIELDS"""
+    """counts passports containing all REQUIRED_FIELDS"""
     valid_count = 0
     for passport in passports:
         if set(passport.keys()) >= REQUIRED_FIELDS:
@@ -31,19 +33,13 @@ def check_passports(passports):
 
 
 def check_passports2(passports):
-	"""counts passports satisfying all field validations"""
+    """counts passports satisfying all field validations"""
 
     def check_height(hgt):
         if hgt.endswith("cm"):
-            return 150 <= int(hgt.split("cm")[0]) <= 193
+            return 150 <= int(hgt.strip("cm")) <= 193
         if hgt.endswith("in"):
-            return 59 <= int(hgt.split("in")[0]) <= 76
-        return False
-
-    def check_hair(hcl):
-    	"""hex code"""
-        if hcl[0] == "#" and len(hcl) == 7:
-        	return all(c.isdigit() or c.lower() in "abcdef" for c in hcl[1:])
+            return 59 <= int(hgt.strip("in")) <= 76
         return False
 
     valid_count = 0
@@ -54,7 +50,7 @@ def check_passports2(passports):
                 and (2010 <= int(passport["iyr"]) <= 2020)
                 and (2020 <= int(passport["eyr"]) <= 2030)
                 and check_height(passport["hgt"])
-                and check_hair(passport["hcl"])
+                and re.match(r"#[0-9a-f]{6}", passport["hcl"])
                 and passport["ecl"] in ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"]
                 and len(passport["pid"]) == 9
                 and int(passport["pid"]) > 0
