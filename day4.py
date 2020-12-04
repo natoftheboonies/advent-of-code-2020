@@ -2,67 +2,73 @@
 
 
 def parse_passports(lines):
-	passports = list()
-	passport = dict()
-	for line in lines:
-		if not line:
-			passports.append(passport)
-			passport = dict()
-		else:
-			fields = line.split()
-			for field in fields:
-				k, v = field.split(':')
-				passport[k]=v
-	passports.append(passport)
-	return passports
+    passports = list()
+    passport = dict()
+    for line in lines:
+        if not line:  # blank line indicates next passport
+            passports.append(passport)
+            passport = dict()
+        else:
+            fields = line.split()
+            for field in fields:
+                k, v = field.split(":")
+                passport[k] = v
+    # append the last passport (no blank line at end)
+    passports.append(passport)
+    return passports
 
-REQUIRED_FIELDS ={'byr', 'iyr', 'eyr', 'hgt', 'hcl', 'ecl', 'pid'}
+
+REQUIRED_FIELDS = {"byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"}
+
 
 def check_passports(passports):
-	valid_count = 0
-	for passport in passports:
-		if set(passport.keys()) >= REQUIRED_FIELDS:
-			valid_count+=1
-	return valid_count
+	"""counts passports containing all REQUIRED_FIELDS"""
+    valid_count = 0
+    for passport in passports:
+        if set(passport.keys()) >= REQUIRED_FIELDS:
+            valid_count += 1
+    return valid_count
+
 
 def check_passports2(passports):
+	"""counts passports satisfying all field validations"""
 
-	def check_height(hgt):
-		if hgt.endswith('cm'):
-			return 150<=int(hgt.split('cm')[0])<=193
-		if hgt.endswith('in'):
-			return 59<=int(hgt.split('in')[0])<=76
-		return False
+    def check_height(hgt):
+        if hgt.endswith("cm"):
+            return 150 <= int(hgt.split("cm")[0]) <= 193
+        if hgt.endswith("in"):
+            return 59 <= int(hgt.split("in")[0]) <= 76
+        return False
 
-	def check_hair(hcl):
-		if hcl[0]=='#' and len(hcl)==7:
-			for c in hcl[1:]:
-				if not c.isdigit() and c.lower() not in 'abcdef':
-					return False
-			return True
-		return False
+    def check_hair(hcl):
+    	"""hex code"""
+        if hcl[0] == "#" and len(hcl) == 7:
+        	return all(c.isdigit() or c.lower() in "abcdef" for c in hcl[1:])
+        return False
 
-	valid_count = 0
-	for passport in passports:
-		if set(passport.keys()) >= REQUIRED_FIELDS:
-			if (1920 <= int(passport['byr']) <= 2002) \
-			and (2010 <= int(passport['iyr']) <= 2020) \
-			and (2020 <= int(passport['eyr']) <= 2030) \
-			and check_height(passport['hgt']) \
-			and check_hair(passport['hcl']) \
-			and passport['ecl'] in ['amb', 'blu', 'brn', 'gry', 'grn', 'hzl', 'oth'] \
-			and len(passport['pid'])==9 and int(passport['pid'])>0 \
-			:
-				valid_count+=1
-	return valid_count
+    valid_count = 0
+    for passport in passports:
+        if set(passport.keys()) >= REQUIRED_FIELDS:
+            if (
+                (1920 <= int(passport["byr"]) <= 2002)
+                and (2010 <= int(passport["iyr"]) <= 2020)
+                and (2020 <= int(passport["eyr"]) <= 2030)
+                and check_height(passport["hgt"])
+                and check_hair(passport["hcl"])
+                and passport["ecl"] in ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"]
+                and len(passport["pid"]) == 9
+                and int(passport["pid"]) > 0
+            ):
+                valid_count += 1
+    return valid_count
 
 
-with open('input4') as fp:
-	input_lines = fp.readlines()
+with open("input4") as fp:
+    input_lines = fp.readlines()
 
 passports = parse_passports([line.strip() for line in input_lines])
-print('#1', check_passports(passports))
-print('#2', check_passports2(passports))
+print("#1", check_passports(passports))
+print("#2", check_passports2(passports))
 
 sample = """\
 ecl:gry pid:860033327 eyr:2020 hcl:#fffffd
