@@ -50,10 +50,9 @@ def check_passports2(passports):
                 and (2010 <= int(passport["iyr"]) <= 2020)
                 and (2020 <= int(passport["eyr"]) <= 2030)
                 and check_height(passport["hgt"])
-                and re.match(r"#[0-9a-f]{6}", passport["hcl"])
+                and re.match(r"^#[0-9a-f]{6}$", passport["hcl"])
                 and passport["ecl"] in ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"]
-                and len(passport["pid"]) == 9
-                and int(passport["pid"]) > 0
+                and re.match(r"^\d{9}$",passport["pid"])
             ):
                 valid_count += 1
     return valid_count
