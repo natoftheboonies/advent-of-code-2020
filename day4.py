@@ -59,9 +59,9 @@ def check_passports2(passports):
 
 
 with open("input4") as fp:
-    input_lines = fp.readlines()
+    input_lines = [line.strip() for line in fp.readlines()]
 
-passports = parse_passports([line.strip() for line in input_lines])
+passports = parse_passports(input_lines)
 print("#1", check_passports(passports))
 print("#2", check_passports2(passports))
 

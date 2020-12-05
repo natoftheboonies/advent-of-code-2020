@@ -2,9 +2,8 @@
 
 
 def seatnum(bpass):
-    bin_row = "".join(["1" if c == "B" else "0" for c in bpass[:7]])
-    bin_col = "".join(["1" if c == "R" else "0" for c in bpass[7:]])
-    return int(bin_row, 2) * 8 + int(bin_col, 2)
+    bin_seat = "".join(["1" if c in "BR" else "0" for c in bpass])
+    return int(bin_seat, 2)
 
 
 with open("input5") as fp:
@@ -14,6 +13,11 @@ seats = [seatnum(x) for x in input_lines]
 
 print("#1", max(seats))
 print("#2", [seat for seat in range(min(seats), max(seats) + 1) if seat not in seats][0])
+
+# https://math.stackexchange.com/questions/2713656/how-to-calculate-sum-of-the-integers-from-m-to-n
+# via https://www.reddit.com/r/adventofcode/comments/k71h6r/2020_day_05_solutions/gepe8a5/
+# s = int(((min(seats) + max(seats)) * (max(seats) - min(seats) + 1)) / 2)
+# print(s - sum(seats))
 
 
 # 00101100
