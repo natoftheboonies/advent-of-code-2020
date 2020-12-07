@@ -1,58 +1,57 @@
 #!/usr/bin/env python3
 
-from collections import defaultdict
-
-with open("input7") as fp:
-    input_lines = [line.strip() for line in fp.readlines()]
+MYBAG = "shiny gold"
 
 
 def parse_rules(lines):
+    """parse lines into dict {'aaaaa': [(3, 'bbbb'), (2 'cccc')]}"""
     rules = dict()
     for line in lines:
         left, right = line.split(" contain ")
-        left = ' '.join(left.split()[:-1])
+        left = " ".join(left.split()[:-1])
         right = right.split(", ")
         contents = list()
         for r in right:
             r = r.split()
             if r[0].isnumeric():
-                contents.append((int(r[0]),' '.join(r[1:3])))
+                contents.append((int(r[0]), " ".join(r[1:-1])))
         rules[left] = contents
 
     return rules
 
 
 def part1(rules):
-    search = 'shiny gold'
-
-    def searchfor(search):
-        match = set()
+    """search for bags contaning MYBAG directly or indirectly"""
+    queue = [MYBAG]
+    match = set()
+    while queue:
+        search = queue.pop()
         for k, v in rules.items():
             if any(bag == search for _, bag in v):
-
                 match.add(k)
-                for j in searchfor(k):
-                    match.add(j)
-        return match
+                queue.append(k)
+    return len(match)
 
-    return len(searchfor(search))
 
 def part2(rules):
-    search = 'shiny gold'
+    """count bags MYBAG contains directly or indirectly"""
 
     def numbags(search):
         count = 0
         for qty, bag in rules[search]:
             count += qty
-            #print("+",qty,bag)
-            count += qty*numbags(bag)
+            count += qty * numbags(bag)
         return count
 
-    return numbags(search)
+    return numbags(MYBAG)
+
+
+with open("input7") as fp:
+    input_lines = [line.strip() for line in fp.readlines()]
 
 rules = parse_rules(input_lines)
-print("#1",part1(rules)) # not 15, not 21
-print("#2",part2(rules))
+print("#1", part1(rules))
+print("#2", part2(rules))
 
 sample = """\
 light red bags contain 1 bright white bag, 2 muted yellow bags.
@@ -66,12 +65,6 @@ faded blue bags contain no other bags.
 dotted black bags contain no other bags.
 """.splitlines()
 
-rules = parse_rules(sample)
-assert part1(rules)==4
-assert part2(rules)==32
-
-
-
-
-
-
+sample_rules = parse_rules(sample)
+assert part1(sample_rules) == 4
+assert part2(sample_rules) == 32
