@@ -1,81 +1,74 @@
-#/usr/bin/env python3
-
-
-def part1(program):
-
-    accum = 0
-    ptr = 0
-    count = 0
-    visited = set()
-    while ptr < len(program) :
-        count += 1
-        if ptr in visited:
-            #print(ptr,accum)
-            return accum
-        inst, b = program[ptr]
-        visited.add(ptr)
-        #print(inst,b)
-        if inst == 'acc':
-            accum += b
-        elif inst == 'jmp':
-            ptr += b
-            continue
-        elif inst == 'nop':
-            pass
-        ptr += 1
-    print('end',accum)
-
-
-def part2(program):
-
-    accum = 0
-    ptr = 0
-    count = 0
-    visited = set()
-    while ptr < len(program) :
-        count += 1
-        if ptr in visited:
-            #print(ptr,accum)
-            return False, -1
-        inst, b = program[ptr]
-        visited.add(ptr)
-        #print(inst,b)
-        if inst == 'acc':
-            accum += b
-        elif inst == 'jmp':
-            ptr += b
-            continue
-        elif inst == 'nop':
-            pass
-        ptr += 1
-    return True, accum
+# /usr/bin/env python3
 
 import copy
 
-def part2wrap(program):
-    for x in range(len(program)):
-        inst = program[x]
-        if inst[0] in ['jmp','nop']:
+
+def part1(program):
+    accum = 0
+    ptr = 0
+    visited = set()
+    while ptr < len(program):
+        if ptr in visited:
+            return accum
+        inst, b = program[ptr]
+        visited.add(ptr)
+        if inst == "jmp":
+            ptr += b
+            continue
+        if inst == "acc":
+            accum += b
+        # else nop
+        ptr += 1
+    raise RuntimeError("Program end")
+
+
+def part2(program):
+    def run_program(program):
+        accum = 0
+        ptr = 0
+        visited = set()
+        while ptr < len(program):
+            if ptr in visited:
+                raise RuntimeError("Program loop")
+            inst, b = program[ptr]
+            visited.add(ptr)
+            if inst == "jmp":
+                ptr += b
+                continue
+            if inst == "acc":
+                accum += b
+            # else nop
+            ptr += 1
+        return accum
+
+    for ptr in range(len(program)):
+        inst = program[ptr]
+        if inst[0] in ["jmp", "nop"]:
             test_program = copy.copy(program)
-            if inst[0]=='jmp':
-                test_program[x] = ('nop', inst[1])
+            if inst[0] == "jmp":
+                test_program[ptr] = ("nop", inst[1])
             else:
-                test_program[x] = ('jmp', inst[1])
-            result = part2(test_program)
-            if result[0]:
-                return result[1]
+                test_program[ptr] = ("jmp", inst[1])
+            try:
+                return run_program(test_program)
+            except RuntimeError:
+                continue
 
-with open('input8') as fp:
-	lines = [line.strip() for line in fp.readlines()]
 
-input_program = list()
-for line in lines:
-    inst = line.split()
-    input_program.append((inst[0],int(inst[1])))
+def parse_program(lines):
+    program = list()
+    for line in lines:
+        inst = line.split()
+        program.append((inst[0], int(inst[1])))
+    return program
 
-print("#1",part1(input_program))
-print("#2",part2wrap(input_program))
 
+with open("input8") as fp:
+    lines = [line.strip() for line in fp.readlines()]
+input_program = parse_program(lines)
+
+print("#1", part1(input_program))
+print("#2", part2(input_program))
 
 sample = """\
 nop +0
@@ -89,14 +82,7 @@ jmp -4
 acc +6
 """.splitlines()
 
-sample_program = list()
-for line in sample:
-    inst = line.split()
-    sample_program.append((inst[0],int(inst[1])))
+sample_program = parse_program(sample)
 
-assert part1(sample_program)==5
-assert part2wrap(sample_program)==8
-
-
-
-
+assert part1(sample_program) == 5
+assert part2(sample_program) == 8
