@@ -1,17 +1,15 @@
 # /usr/bin/env python3
 
+from collections import deque
 from itertools import combinations
 
+
 def solve(sequence, preamble):
-    for i in range(preamble,len(sequence)):
+    for i in range(preamble, len(sequence)):
         num = sequence[i]
-        if any(a + b == num for a,b in combinations(sequence[i-preamble:i],2)):
-            continue
-        else:
-            #print(i)
+        if not any(a + b == num for a, b in combinations(sequence[i - preamble : i], 2)):
             return num
 
-from collections import deque
 
 def part2(sequence, target):
     working = deque(sequence[0:2])
@@ -22,15 +20,16 @@ def part2(sequence, target):
         while sum(working) < target:
             working.append(sequence[i])
             i += 1
-    print(working)
-    return min(working)+max(working)
+    return min(working) + max(working)
 
-with open('input9') as fp:
+
+with open("input9") as fp:
     input_lines = [line.strip() for line in fp.readlines()]
 
-input_sequence = list(map(int,input_lines))
-print("#1",solve(input_sequence,25))
-print("#2",part2(input_sequence,solve(input_sequence,25)))
+input_sequence = list(map(int, input_lines))
+part1 = solve(input_sequence, 25)
+print("#1", part1)
+print("#2", part2(input_sequence, part1))
 
 
 sample = """\
@@ -56,6 +55,6 @@ sample = """\
 576
 """.splitlines()
 
-sample_sequence = list(map(int,sample))
+sample_sequence = list(map(int, sample))
 assert solve(sample_sequence, 5) == 127
-assert part2(sample_sequence,127)==62
+assert part2(sample_sequence, 127) == 62
