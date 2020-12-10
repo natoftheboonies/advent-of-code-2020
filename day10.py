@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 from collections import defaultdict
+from functools import reduce
+from operator import mul
 
 
 def part1(lines):
@@ -17,8 +19,19 @@ def part1(lines):
     return ones * threes
 
 
-def part2(lines):
+# hint from https://www.reddit.com/r/adventofcode/comments/ka9pc3/2020_day_10_part_2_suspicious_factorisation/
+def tribonacci(n):
+    if n < 1:
+        return 0
+    elif n == 1:
+        return 1
+    return tribonacci(n - 1) + tribonacci(n - 2) + tribonacci(n - 3)
 
+
+assert tribonacci(5) == 7
+
+
+def part2(lines):
     sequences = defaultdict(int)
 
     puzzle_input = sorted(map(int, lines))
@@ -34,7 +47,8 @@ def part2(lines):
     # add the last sequence!
     if len(sequence) > 2:
         sequences[len(sequence)] += 1
-    return 7 ** sequences[5] * 4 ** sequences[4] * 2 ** sequences[3]
+
+    return reduce(mul, (tribonacci(k) ** v for k, v in sequences.items()))
 
 
 with open("input10") as fp:
