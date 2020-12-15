@@ -19,16 +19,24 @@ def part1(lines):
     return ones * threes
 
 
+tribonacci_memo = {1:1}
 # hint from https://www.reddit.com/r/adventofcode/comments/ka9pc3/2020_day_10_part_2_suspicious_factorisation/
 def tribonacci(n):
     if n < 1:
         return 0
-    elif n == 1:
-        return 1
-    return tribonacci(n - 1) + tribonacci(n - 2) + tribonacci(n - 3)
+    if n in tribonacci_memo:
+        return tribonacci_memo[n]
+    
+    result = 0
+    for part in [n-1,n-2,n-3]:
+        if part not in tribonacci_memo:
+            tribonacci_memo[part] = tribonacci(part)
+        result += tribonacci_memo[part]
+    return result
 
 
 assert tribonacci(5) == 7
+print(tribonacci(13))
 
 
 def part2(lines):
