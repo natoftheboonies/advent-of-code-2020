@@ -28,7 +28,7 @@ def tribonacci(n):
         return tribonacci_memo[n]
     
     result = 0
-    for part in [n-1,n-2,n-3]:
+    for part in [n-1, n-2, n-3]:
         if part not in tribonacci_memo:
             tribonacci_memo[part] = tribonacci(part)
         result += tribonacci_memo[part]
