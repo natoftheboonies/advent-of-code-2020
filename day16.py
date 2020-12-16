@@ -2,27 +2,29 @@
 
 import re
 
+
 def parse(data):
     sections = data.split("\n\n")
     fields = dict()  # class : ((0,1),(4,9))
     for line in sections[0].splitlines():
         field = line.split(":")[0]
         fieldranges = []
-        matches = re.findall(r"(\d+-\d+)",line.strip())
+        matches = re.findall(r"(\d+-\d+)", line.strip())
         for match in matches:
             low, high = match.split("-")
-            fieldranges.append((int(low),int(high)))
+            fieldranges.append((int(low), int(high)))
         fields[field] = tuple(fieldranges)
 
-    myticket = tuple(map(int,sections[1].splitlines()[1].strip().split(",")))
+    myticket = tuple(map(int, sections[1].splitlines()[1].strip().split(",")))
 
     nearby = sections[2].splitlines()[1:]
     tickets = []
     for line in nearby:
-        ticket = tuple(map(int,line.strip().split(",")))
+        ticket = tuple(map(int, line.strip().split(",")))
         tickets.append(ticket)
 
     return fields, myticket, tickets
+
 
 def find_invalid(fields, ticket):
     invalid = []
@@ -39,8 +41,9 @@ def part1(data):
     fields, myticket, tickets = parse(data)
     invalid = []
     for t in tickets:
-        invalid.extend(find_invalid(fields,t))
+        invalid.extend(find_invalid(fields, t))
     return sum(invalid)
+
 
 def valid_fields(fields, tickets, idx):
     valid = []
@@ -56,18 +59,18 @@ def valid_fields(fields, tickets, idx):
 
 def part2(data):
     fields, myticket, tickets = parse(data)
-    alltickets = [t for t in tickets if not find_invalid(fields, t)]+[myticket]
+    alltickets = [t for t in tickets if not find_invalid(fields, t)] + [myticket]
     possible = []
     for i in range(len(myticket)):
         valid = valid_fields(fields, alltickets, i)
         possible.append(valid)
     count = 0
-    while any((len(p)>1 for p in possible)) and count < 100:
-        count+=1
+    while any((len(p) > 1 for p in possible)) and count < 100:
+        count += 1
         # find certain fields:
         certain = [p[0] for p in possible if len(p) == 1]
         for p in possible:
-            if len(p)==1:
+            if len(p) == 1:
                 continue
             for c in certain:
                 if c in p:
@@ -78,11 +81,12 @@ def part2(data):
             departure_product *= myticket[i]
     return departure_product
 
-with open('input16') as fp:
+
+with open("input16") as fp:
     puzzle = fp.read()
 
-print("#1",part1(puzzle))
-print("#2",part2(puzzle))
+print("#1", part1(puzzle))
+print("#2", part2(puzzle))
 
 sample = """\
 class: 1-3 or 5-7
@@ -99,7 +103,7 @@ nearby tickets:
 38,6,12
 """
 
-assert part1(sample)==71
+assert part1(sample) == 71
 
 sample2 = """\
 class: 0-1 or 4-19
@@ -114,4 +118,4 @@ nearby tickets:
 15,1,5
 5,14,9
 """
-part2(sample2)
+print(part2(sample2))
