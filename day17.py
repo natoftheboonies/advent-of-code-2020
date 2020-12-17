@@ -1,126 +1,65 @@
 #!/usr/bin/env python3
 
-from collections import defaultdict
+from itertools import product
 
 
+def solve(cube, part2=False):
+    if part2:
+        potential = list(product((-1, 0, 1), repeat=4))
+    else:
+        potential = list(((*foo, 0) for foo in product((-1, 0, 1), repeat=3)))
+    potential.remove((0, 0, 0, 0))
 
-
-
-def part1(cube):
-
-    def check(target, cube):
+    def check(target, cube, friends=None):
         neighbors = 0
-        for y in range(-1,2):
-            for x in range(-1,2):
-                for z in range(-1,2):
-                    friend = (target[0]+x,target[1]+y,target[2]+z)
-                    if friend == target:
-                        continue
-                    if friend in cube:
-                        neighbors += 1
+        for x, y, z, w in potential:
+            friend = (target[0] + x, target[1] + y, target[2] + z, target[3] + w)
+            if friends is not None:
+                friends.add(friend)
+            if friend in cube:
+                neighbors += 1
         if target in cube:
-            if neighbors in (2,3):
+            if neighbors in (2, 3):
                 return True
             return False
         elif neighbors == 3:
             return True
         return False
 
-
     def grow(cube):
         cube_n = set()
-        x_range = range(min(x for (x,y,z) in cube)-1, max(x for (x,y,z) in cube)+2)
-        y_range = range(min(y for (x,y,z) in cube)-1, max(y for (x,y,z) in cube)+2)
-        z_range = range(min(z for (x,y,z) in cube)-1, max(z for (x,y,z) in cube)+2)
-        for x in x_range:
-            for y in y_range:
-                for z in z_range:
-                    pos = (x,y,z)
-                    if check(pos,cube):
-                        cube_n.add(pos)
+        also_check = set()
+        for pos in cube:
+            if check(pos, cube, also_check):
+                cube_n.add(pos)
+        for pos in also_check - cube:
+            if check(pos, cube):
+                cube_n.add(pos)
         return cube_n
 
     for _ in range(6):
         cube = grow(cube)
-        #print(len(cube))
-    return len(cube)
-
-
-def part2(cube):
-
-    def check(target, cube):
-        neighbors = 0
-        for y in range(-1,2):
-            for x in range(-1,2):
-                for z in range(-1,2):
-                    for w in range(-1,2):
-                        friend = (target[0]+x,target[1]+y,target[2]+z, target[3]+w)
-                        if friend == target:
-                            continue
-                        if friend in cube:
-                            neighbors += 1
-        if target in cube:
-            if neighbors in (2,3):
-                return True
-            return False
-        elif neighbors == 3:
-            return True
-        return False
-
-
-    def grow(cube):
-        cube_n = set()
-        x_range = range(min(x for (x,y,z,w) in cube)-1, max(x for (x,y,z,w) in cube)+2)
-        y_range = range(min(y for (x,y,z,w) in cube)-1, max(y for (x,y,z,w) in cube)+2)
-        z_range = range(min(z for (x,y,z,w) in cube)-1, max(z for (x,y,z,w) in cube)+2)
-        w_range = range(min(w for (x,y,z,w) in cube)-1, max(z for (x,y,z,w) in cube)+2)
-        for x in x_range:
-            for y in y_range:
-                for z in z_range:
-                    for w in w_range:
-                        pos = (x,y,z,w)
-                        if check(pos,cube):
-                            cube_n.add(pos)
-        return cube_n
-
-    for _ in range(6):
-        cube = grow(cube)
-        #print(len(cube))
     return len(cube)
 
 
 def parse(lines):
     cube = set()
-
-    z = 0
-    y_offset = len(lines)//2
+    w = z = 0
+    y_offset = len(lines) // 2
     for y, line in enumerate(lines):
-        x_offset = len(line)//2
+        x_offset = len(line) // 2
         for x, c in enumerate(line):
             if c == "#":
-                pos = (x-x_offset, y-y_offset, z)
+                pos = (x - x_offset, y - y_offset, z, w)
                 cube.add(pos)
     return cube
 
-def parse2(lines):
-    cube = set()
 
-    z = 0
-    w = 0
-    y_offset = len(lines)//2
-    for y, line in enumerate(lines):
-        x_offset = len(line)//2
-        for x, c in enumerate(line):
-            if c == "#":
-                pos = (x-x_offset, y-y_offset, z, w)
-                cube.add(pos)
-    return cube
-
-with open('input17') as fp:
+with open("input17") as fp:
     input_lines = [line.strip() for line in fp.readlines()]
 
-print("#1",part1(parse(input_lines)))
-print("#2",part2(parse2(input_lines)))
+print("#1", solve(parse(input_lines)))
+print("#2", solve(parse(input_lines), True))
 
 sample = """\
 .#.
@@ -128,8 +67,5 @@ sample = """\
 ###
 """.splitlines()
 
-assert part1(parse(sample))==112
-assert part2(parse2(sample))==848
-
-
-
+assert solve(parse(sample)) == 112
+assert solve(parse(sample),True) == 848
