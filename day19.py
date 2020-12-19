@@ -53,73 +53,89 @@ import re
 
 def part2(rule_lines, message_lines):
 
-    messages = set((m.strip() for m in message_lines))
-    print("messages", len(messages))
+    def check42(message):
+        #print("checking",message)
+        if len(message)<5:
+            return True
+        for r in resolved[42]:
+            if message==r:
+                return True
+            elif message.startswith(r):
+                return check42(message[len(r):])
+        return False
 
-    for i, r in enumerate(rule_lines):
-        if r.startswith("8: "):
-            rule_lines[i] = '8: "x"'
-        elif r.startswith("11: "):
-            rule_lines[i] = '11: "y"'
+    messages = set((m.strip() for m in message_lines))
+    #print("messages", len(messages))
 
     rules = parse(rule_lines)
-
-    print("rules",rules)
-    print("42",generate(rules,42))
-    print("31",generate(rules,31))
-    print(big)
-    #print(rules[0])
-
+    rules[8]=[(42,),(42,8)]  # (42)+
+    rules[11]=[(42,31),(42,11,31)]  # (42){n}(31){n} for some n>0
+    rules[0]=[(8,11)]  # (42)+(42){n}(31){n}
     count = 0
 
-    # 11 = 42 31 | 42 11 31
-    # =
-    rule42 = generate(rules,42)
-    rule31 = generate(rules,31)
-    print("42",rule42)
-    print("31",rule31)
-    # how many contain a 31*42 ?
-    both4231 = [c for c in product(rule42,rule31)]
-    print('both',len(both4231))
-    for b in both4231:
-        nonregx = ''.join(b)
-        regex = r'('+b[0]+r')+('+b[1]+r')+'
-        p = re.compile(regex)
-        #print(p)
-        candidates = set()
-        for m in messages:
-            if p.search(m):
-                candidates.add(m)
-        if candidates:
-            print("rule",regex,"matched",len(candidates))
-    print(candidates)
-    # how many contain an 8?
-    for rule in rule8:
-        regex = "^("+rule+")+$"
-        p = re.compile(regex)
-        matched = set()
-        for m in messages:
-            if p.search(m):
-                matched.add(m)
-        if matched:
-            print("rule",regex,"matched",len(matched))
-    messages -= matched
-    #print("rule",rules[8])
-    #print(len(rules))
-    big = generate(rules,0)
+    resolved = dict()
+    for x in rules:
+        if x in (0,8,11):
+            continue
+        resolved[x] = generate(rules,x)
+        # if x in (42,31):
+        #     print(resolved[x])
 
-    for x in messages:
-        if x.strip() in big:
-            count += 1
-    print("count",count)
+
+    # for e in resolved[42]:
+    #     break
+    # size = len(e)
+    # print("42s are",size)
+    # print("and we have",len(resolved[42]),"out of",2**size)
+    # for e in resolved[31]:
+    #     break
+    # size = len(e)
+    # print("31s are",size)
+    # print("and we have",len(resolved[31]),"out of",2**size)
+
+    regex42 = ["("]
+    for x in resolved[42]:
+        regex42.append(x)
+        regex42.append("|")
+    regex42[-1] = ")"
+    regex42 = ''.join(regex42)
+
+    regex31 = ["("]
+    for x in resolved[31]:
+        regex31.append(x)
+        regex31.append("|")
+    regex31[-1] = ")"
+    regex31 = ''.join(regex31)
+
+    # ((42)(42))+(31)+
+    #bigolregex = r"^("+regex42+regex42+")+"+regex31+"+$"
+    p10 = []
+    # (42)+(42){n}(31){n}
+    for loop in range(1,12):
+        thisregex = r"^"+regex42+"+"
+        thisregex+=regex42+"{"+str(loop)+"}"
+        thisregex+=regex31+"{"+str(loop)+"}"
+        thisregex += "$"
+        p10.append(re.compile(thisregex))
+
+    #bigolregex = r"^"+regex42+"+"+regex42+"{n}"+regex31+"{n}$"
+    #p = re.compile(bigolregex)
+
+    for m in messages:
+        #print("checking",m)
+        if any((p.match(m) for p in p10)):
+            #print(m,"matched it")
+            count+=1
+
+    #print("rules",rules)
     return count
 
 
 with open('input19') as fp:
     rulepart, checkpart = fp.read().split("\n\n")
 
-#print("#1",part1(rulepart.splitlines(),checkpart.splitlines()))
-#print("#2",part2(rulepart.splitlines(),checkpart.splitlines()))
+print("#1",part1(rulepart.splitlines(),checkpart.splitlines()))
+print("#2",part2(rulepart.splitlines(),checkpart.splitlines()))
 
 sample = """\
 0: 4 1 5
