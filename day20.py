@@ -2,19 +2,20 @@
 
 import math
 
+
 def encode(edge):
     edge_bin = ["1" if c == "#" else "0" for c in edge]
-    a,b = int(''.join(edge_bin),2), int(''.join(reversed(edge_bin)),2)
-    return tuple(sorted([a,b]))
+    a, b = int("".join(edge_bin), 2), int("".join(reversed(edge_bin)), 2)
+    return tuple(sorted([a, b]))
+
 
 class Tile(object):
     """docstring for Tile"""
+
     def __init__(self, number, lines):
         super(Tile, self).__init__()
         self.number = number
         self.lines = lines
-        self.rotate = 0
-        self.mirror = False
 
     def left(self):
         return "".join([line[0] for line in self.lines])
@@ -47,7 +48,7 @@ class Tile(object):
         return [line[1:-1] for line in self.lines[1:-1]]
 
     def rotate_c(self):  # clockwise
-        self.lines = [''.join(line) for line in list(zip(*self.lines[::-1]))]
+        self.lines = ["".join(line) for line in list(zip(*self.lines[::-1]))]
 
     def mirror_v(self):  # vertical
         self.lines = self.lines[::-1]
@@ -55,106 +56,48 @@ class Tile(object):
     def mirror_h(self):  # horizontal
         self.lines = [line[::-1] for line in self.lines]
 
-    def orient(self,edges,neighbors):
-        # match orientation of borders
-        #print("orient",self, neighbors)
+    def orient(self, edges, neighbors):
+        # match orientation to left/top tiles
         if any(isinstance(n, Tile) for n in neighbors):
-            count = 0
-            if isinstance(neighbors[0],Tile):
+            if isinstance(neighbors[0], Tile):
                 # top neighbor
                 neighbor = neighbors[0]
                 while self.top_enc() != neighbor.bottom_enc():
-                    #print("rotate to match neighbor")
                     self.rotate_c()
-                    count += 1
-                    if count > 3:
-                        raise Exception
                 if self.top() != neighbor.bottom():
-                    #print("mirror_h to match neighbor")
                     self.mirror_h()
-            if isinstance(neighbors[1],Tile):
-                # left neighbor
-                neighbor = neighbors[1]
-                while self.right_enc() != neighbor.left_enc():
-                    #print("rotate to match neighbor")
-                    self.rotate_c()
-                    count += 1
-                    if count > 3:
-                        raise Exception
-                if self.right() != neighbor.left():
-                    #print("mirror_v to match neighbor")
-                    self.mirror_v()
-            if isinstance(neighbors[2],Tile):
-                # left neighbor
-                neighbor = neighbors[2]
-                while self.bottom_enc() != neighbor.top_enc():
-                    #print("rotate to match neighbor")
-                    self.rotate_c()
-                    count += 1
-                    if count > 3:
-                        raise Exception
-                if self.bottom() != neighbor.top():
-                    #print("mirror_h to match neighbor")
-                    self.mirror_h()
-            if isinstance(neighbors[3],Tile):
+            # filling l->r, t->b so don't need to check right or bottom
+            if isinstance(neighbors[3], Tile):
                 # left neighbor
                 neighbor = neighbors[3]
                 while self.left_enc() != neighbor.right_enc():
-                    #print("rotate to match neighbor")
                     self.rotate_c()
-                    count += 1
-                    if count > 3:
-                        raise Exception
                 if self.left() != neighbor.right():
-                    #print("mirror_v to match neighbor")
                     self.mirror_v()
-        elif 0 in neighbors:
+        elif 0 in neighbors:  # orient to outer border
             target = tuple((1 if e == 0 else 2 for e in neighbors))
             while tuple(edges[edge] for edge in self.edges_enc()) != target:
                 current = tuple(edges[edge] for edge in self.edges_enc())
-                #print("rotate", current, "doesn't match", target)
                 self.rotate_c()
 
         # check ourselves
         if neighbors[0] is not None:
             if neighbors[0] == 0:
-                assert edges[self.top_enc()]==1
+                assert edges[self.top_enc()] == 1
             else:
                 assert self.top() == neighbors[0].bottom()
 
         if neighbors[3] is not None:
             if neighbors[3] == 0:
-                assert edges[self.left_enc()]==1
+                assert edges[self.left_enc()] == 1
             else:
                 assert self.left() == neighbors[3].right()
 
-
-
     def __repr__(self):
-        return "Tile: "+str(self.number)
-
-
-testtile = Tile(2311,"""..##.#..#.
-##..#.....
-#...##..#.
-####.#...#
-##.##.###.
-##...#.###
-.#.#.#..##
-..#....#..
-###...#.#.
-..###..###""".splitlines())
-
-t,r,b,l = testtile.top(), testtile.right(), testtile.bottom(), testtile.left()
-testtile.mirror_v()
-assert testtile.top() == b
-testtile.mirror_h()
-assert testtile.left() == r[::-1]
-
+        return "Tile: " + str(self.number)
 
 
 def parse(tiles_input):
-    #tiles = dict()  # id : top, right, bottom, left as tuple(low, high)
     tiles = []
     for block in tiles_input:
         lines = [line.strip() for line in block.splitlines()]
@@ -176,8 +119,6 @@ def find_edges(tiles):
             else:
                 edges[edge] = 1
     return edges
-    for edge in edges:
-        print(edge,":",edges[edge])
 
 
 def find_corners(tiles, edges):
@@ -189,14 +130,14 @@ def find_corners(tiles, edges):
             if edges[edge] == 1:
                 borders += 1
         if borders > 1:
-            #print(tile, "is a corner")
             corners.append(tile)
     return corners
+
 
 def part1(tiles, edges):
     result = 1
     for tile in find_corners(tiles, edges):
-            result *= tile.number
+        result *= tile.number
     return result
 
 
@@ -205,41 +146,43 @@ monster_img = """\
 #    ##    ##    ###
  #  #  #  #  #  #
 """.splitlines()
+
 monster = list()
-for y,line in enumerate(monster_img):
-    for x,c in enumerate(line):
+for y, line in enumerate(monster_img):
+    for x, c in enumerate(line):
         if c == "#":
-            monster.append((x,y))
-#print(monster)
-monster_max_y = max((y for x,y in monster))
-monster_max_x = max((x for x,y in monster))
+            monster.append((x, y))
+
+monster_max_y = max((y for x, y in monster))
+monster_max_x = max((x for x, y in monster))
+
 
 def find_monsters(image):
     # assume no overlapping monsters
     monsters = 0
-    for y in range(len(image)-monster_max_y):
-        for x in range(len(image[y])-monster_max_x):
-            if all(image[y+dy][x+dx]=="#" for dx,dy in monster):
-                #print("found a monster!")
-                monsters+=1
+    for y in range(len(image) - monster_max_y):
+        for x in range(len(image[y]) - monster_max_x):
+            if all(image[y + dy][x + dx] == "#" for dx, dy in monster):
+                # print("found a monster!")
+                monsters += 1
     if monsters > 0:
         roughness = sum(line.count("#") for line in image)
-        return roughness-monsters*len(monster)
+        return roughness - monsters * len(monster)
     return None
 
 
 def solve_puzzle(tiles, edges):
     puzzle_edge = math.isqrt(len(tiles))
-    puzzle = [[None]*puzzle_edge for _ in range(puzzle_edge)]
+    puzzle = [[None] * puzzle_edge for _ in range(puzzle_edge)]
 
     # fill in the puzzle
     for y in range(len(puzzle)):
         for x in range(len(puzzle[y])):
-            top = puzzle[y-1][x] if y > 0 else 0
-            right = puzzle[y][x+1] if x < len(puzzle[y])-1 else 0
-            bottom = puzzle[y+1][x] if y < len(puzzle)-1 else 0
-            left = puzzle[y][x-1] if x > 0 else 0
-            if x==y==0:
+            top = puzzle[y - 1][x] if y > 0 else 0
+            right = puzzle[y][x + 1] if x < len(puzzle[y]) - 1 else 0
+            bottom = puzzle[y + 1][x] if y < len(puzzle) - 1 else 0
+            left = puzzle[y][x - 1] if x > 0 else 0
+            if x == y == 0:
                 # place a corner in top-left
                 match = find_corners(tiles, edges)[0]
                 match.mirror_h()
@@ -247,56 +190,48 @@ def solve_puzzle(tiles, edges):
                 match = [tile for tile in tiles if tile != left and left.right_enc() in tile.edges_enc()][0]
             elif 0 < y < len(puzzle):  # find piece matching neighbor top
                 match = [tile for tile in tiles if tile != top and top.bottom_enc() in tile.edges_enc()][0]
-            else:
-                print("why?",x,y)
             # place it
             puzzle[y][x] = match
             # orient it
-            match.orient(edges,(top,right,bottom,left))
+            match.orient(edges, (top, right, bottom, left))
 
-    #print(puzzle)
     # now let's join it
-
     piece_lines = len(puzzle[0][0].image_lines())
-    image_size = puzzle_edge*piece_lines
-    #print("image size",image_size)
+    image_size = puzzle_edge * piece_lines
 
-    image = ['']*image_size
-    #print(image)
+    image = [""] * image_size
 
     for line in range(image_size):
-        y = line//piece_lines
+        y = line // piece_lines
         for x in range(len(puzzle[0])):
             piece = puzzle[y][x]
-            image[line]+=piece.image_lines()[line%piece_lines]
+            image[line] += piece.image_lines()[line % piece_lines]
 
-    # rotate
-    for _ in range(4):
-        #print("check")
+    # check permutations of image
+    for _ in range(3):
         result = find_monsters(image)
         if result:
             return result
-        #print("check_rev")
-        image = [line[::-1] for line in image]
+        image = ["".join(line) for line in list(zip(*image[::-1]))]
+    image = [line[::-1] for line in image]
+    for _ in range(3):
         result = find_monsters(image)
         if result:
             return result
-        image = [line[::-1] for line in image]
-        image = [''.join(line) for line in list(zip(*image[::-1]))]
-
+        image = ["".join(line) for line in list(zip(*image[::-1]))]
 
 
 def part2(tiles, edges):
     return solve_puzzle(tiles, edges)
 
 
-with open('input20') as fp:
+with open("input20") as fp:
     input_data = fp.read().split("\n\n")
 
 tiles = parse(input_data)
 edges = find_edges(tiles)
-print("#1",part1(tiles, edges))
-print("#2",part2(tiles, edges))
+print("#1", part1(tiles, edges))
+print("#2", part2(tiles, edges))
 
 
 sample = """\
@@ -407,11 +342,12 @@ Tile 3079:
 ..#.###...
 ..#.......
 ..#.###...
-""".split("\n\n")
+""".split(
+    "\n\n"
+)
 
 tiles = parse(sample)
-#print(tiles)
 edges = find_edges(tiles)
-assert part1(tiles, edges) == 20899048083289
 
-assert part2(tiles, edges)==273
+assert part1(tiles, edges) == 20899048083289
+assert part2(tiles, edges) == 273
