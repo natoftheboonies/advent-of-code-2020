@@ -1,51 +1,54 @@
 #!/usr/bin/env python3
 
+
 def reduce_moves(moves):
     """ from 2017 day 11 :) """
-    if 'sw' in moves and 'ne' in moves:
-        if moves['sw'] > moves['ne']:
-            moves['sw'] -= moves['ne']
-            moves.pop('ne')
+    if "sw" in moves and "ne" in moves:
+        if moves["sw"] > moves["ne"]:
+            moves["sw"] -= moves["ne"]
+            moves.pop("ne")
         else:
-            moves['ne'] -= moves['sw']
-            moves.pop('sw')
-    if 'nw' in moves and 'se' in moves:
-        if moves['nw'] > moves['se']:
-            moves['nw'] -= moves['se']
-            moves.pop('se')
+            moves["ne"] -= moves["sw"]
+            moves.pop("sw")
+    if "nw" in moves and "se" in moves:
+        if moves["nw"] > moves["se"]:
+            moves["nw"] -= moves["se"]
+            moves.pop("se")
         else:
-            moves['se'] -= moves['nw']
-            moves.pop('nw')
-    if 'e' in moves and 'w' in moves:
-        if moves['e'] > moves['w']:
-            moves['e'] -= moves['w']
-            moves.pop('w')
+            moves["se"] -= moves["nw"]
+            moves.pop("nw")
+    if "e" in moves and "w" in moves:
+        if moves["e"] > moves["w"]:
+            moves["e"] -= moves["w"]
+            moves.pop("w")
         else:
-            moves['w'] -= moves['e']
-            moves.pop('e')
+            moves["w"] -= moves["e"]
+            moves.pop("e")
     return moves
+
 
 def follow(moves):
     x = y = 0
     for d in moves:
 
-        if d == 'e':
-            x += moves[d]*2
-        elif d == 'w':
-            x -= moves[d]*2
-        elif 'e' in d:
+        if d == "e":
+            x += moves[d] * 2
+        elif d == "w":
+            x -= moves[d] * 2
+        elif "e" in d:
             x += moves[d]
-            if 's' in d:
+            if "s" in d:
                 y -= moves[d]
-            elif 'n' in d:
+            elif "n" in d:
                 y += moves[d]
-        elif 'w' in d:
+        elif "w" in d:
             x -= moves[d]
-            if 's' in d:
+            if "s" in d:
                 y -= moves[d]
-            elif 'n' in d:
+            elif "n" in d:
                 y += moves[d]
-    return x,y
+    return x, y
+
 
 def parse(lines):
     paths = []
@@ -53,16 +56,16 @@ def parse(lines):
         c = 0
         moves = {}
         while c < len(line.strip()):
-            if line[c] in ("s","n"):
-                move = line[c:c+2]
-                c+=2
+            if line[c] in ("s", "n"):
+                move = line[c : c + 2]
+                c += 2
             else:
                 move = line[c]
-                c+=1
+                c += 1
             if move in moves:
-                moves[move]+=1
+                moves[move] += 1
             else:
-                moves[move]=1
+                moves[move] = 1
         moves = reduce_moves(moves)
         result = follow(moves)
         paths.append(result)
@@ -78,11 +81,12 @@ def flip(paths):
             tiles.add(tile)
     return tiles
 
+
 def part1(paths):
     return len(flip(paths))
 
 
-hex_neighbors = ((1,1),(-1,-1),(1,-1),(-1,1),(2,0),(-2,0))
+hex_neighbors = ((1, 1), (-1, -1), (1, -1), (-1, 1), (2, 0), (-2, 0))
 
 
 def part2(paths):
@@ -91,39 +95,38 @@ def part2(paths):
         state_n = set()
         neighbors = set()
         for pos in state:
-            x,y = pos
+            x, y = pos
             # check pos for 0 or >2 neighbors
             count = 0
-            for dx,dy in hex_neighbors:
-                neighbor = (x+dx,y+dy)
+            for dx, dy in hex_neighbors:
+                neighbor = (x + dx, y + dy)
                 neighbors.add(neighbor)
                 if neighbor in state:
                     count += 1
-            if 0<count<=2:
+            if 0 < count <= 2:
                 state_n.add(pos)
         for pos in neighbors:
             if pos in state:
                 continue
-            x,y = pos
+            x, y = pos
             count = 0
-            for dx,dy in hex_neighbors:
-                neighbor = (x+dx,y+dy)
+            for dx, dy in hex_neighbors:
+                neighbor = (x + dx, y + dy)
                 if neighbor in state:
                     count += 1
-            if count==2:
+            if count == 2:
                 state_n.add(pos)
         state = state_n
-        #print("next: ",len(state))
+        # print("next: ",len(state))
     return len(state)
 
 
-
-with open('input24') as fp:
+with open("input24") as fp:
     lines = [line.strip() for line in fp.readlines()]
 
 paths = parse(lines)
-print("#1",part1(paths))
-print("#2",part2(paths))
+print("#1", part1(paths))
+print("#2", part2(paths))
 
 sample = """\
 sesenwnenenewseeswwswswwnenewsewsw
