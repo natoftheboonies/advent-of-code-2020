@@ -4,27 +4,30 @@ from itertools import count
 
 divisor = 20201227
 
-subject = 7
 
-result = 1
+def solve(search):
+    subject = 7
+    result = 1
 
-#search = (5764801,17807724)
-search = (5107328,11349501)
+    # search for both loops
+    loops = []
+    for i in count(1):
+        result = (result * subject) % divisor
+        if result in search:
+            loops.append(i)
+        if len(loops) == 2:
+            break
 
-found = []
-for x in count(1):
-    result = (result*subject)%divisor
-    if result in search:
-        found.append(x)
-    if len(found)==2:
-        break
-a, b = found
-print(a,b)
+    # calculate encryption key
+    subject = result
+    for _ in range(loops[0] - 1):
+        result = (result * subject) % divisor
 
-#print(result)
-subject = result
-for x in range(a-1):
-    result = (result*subject)%divisor
-    #print(x, result)
+    return result
 
-print("#1",result)
+
+puzzle = (5107328, 11349501)
+print("#1", solve(puzzle))
+
+sample = (5764801, 17807724)
+assert solve(sample) == 14897079
